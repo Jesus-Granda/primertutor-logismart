@@ -12,11 +12,11 @@ import ollama
 import armador_pc as armador
 
 MODELO = "llama3.2"
-KEEP_ALIVE = "30m"          # mantiene el modelo cargado en memoria: respuestas más rápidas
+KEEP_ALIVE = "30m"         
 OPCIONES_LLM = {"num_ctx": 4096, "num_predict": 700, "temperature": 0.4}
-MAX_HISTORIAL = 12          # mensajes recientes que se envían al modelo (menos = más rápido)
+MAX_HISTORIAL = 12         
 
-# 1) Configuración del sistema (tema distinto al del ejemplo: armado de PCs)
+
 MENSAJE_SISTEMA = f"""Eres PC Master, un técnico experto en armado de computadoras que enseña a
 estudiantes y principiantes. Responde siempre en español, claro y directo.
 
@@ -50,7 +50,7 @@ SUGERENCIAS = [
 ]
 USOS = list(armador.USOS.items())
 
-# ------------------------------------------------------------------ temas
+
 FUENTE = "Segoe UI"
 MONO = "Consolas"
 OSCURO = dict(
@@ -106,8 +106,6 @@ def rr(x1, y1, x2, y2, r):
 
 INLINE = re.compile(r"(\*\*.+?\*\*|`[^`\n]+`)")
 
-
-# ----------------------------------------------------------- componentes
 class Vidrio:
     """Panel 'glass': tinte translúcido calculado sobre el fondo, borde fino, brillo y sombra suave."""
 
@@ -239,8 +237,6 @@ class Boton:
                             outline=hx(acc if on else mix(borde, txt_col, 0.25)))
             c.itemconfigure(self.palomita, fill=T["primary_fg"], state="normal" if on else "hidden")
 
-
-# ------------------------------------------------------------ aplicación
 class PCMaster:
     M = 16
     SIDEBAR = 300
@@ -317,10 +313,8 @@ class PCMaster:
                                     text=f"Precios de referencia en USD ({armador.ACTUALIZADO}). "
                                          "Cambian seguido: compara antes de comprar.")
 
-        # ---------- sugerencias
         self.chips = [Boton(self, t, lambda p=p: self.enviar_texto(p), tam=8) for t, p in SUGERENCIAS]
 
-        # ---------- chat
         self.v_chat = Vidrio(self, 18)
         self.chat = tk.Text(c, wrap="word", font=(FUENTE, 11), relief="flat", bd=0, highlightthickness=0,
                             padx=8, pady=8, cursor="arrow", state="disabled", yscrollcommand=self._scroll)
@@ -328,7 +322,6 @@ class PCMaster:
         self.thumb = c.create_polygon(0, 0, 0, 0, 0, 0, smooth=True, outline="")
         self.progreso = c.create_rectangle(0, 0, 1, 1, width=0, state="hidden")
 
-        # ---------- entrada
         self.v_in = Vidrio(self, 16)
         self.entrada = tk.Text(c, wrap="word", font=(FUENTE, 11), relief="flat", bd=0, highlightthickness=0,
                                padx=8, pady=6)
@@ -338,7 +331,6 @@ class PCMaster:
         self.entrada.bind("<FocusOut>", lambda e: self._set_foco(0.0))
         self.b_enviar = Boton(self, "Enviar", self.enviar_o_detener, primario=True, tam=10)
 
-        # ---------- pie
         self.b_res = Boton(self, "Resumen del historial", self.resumen)
         self.b_copiar = Boton(self, "Copiar último build", self.copiar_build)
         self.b_exp = Boton(self, "Exportar chat", self.exportar)
@@ -360,12 +352,10 @@ class PCMaster:
         threading.Thread(target=self._precargar, daemon=True).start()
         self._frame()
 
-    # ------------------------------------------------------------ colores
     def bg_at(self, yf):
         yf = max(0.0, min(1.0, yf))
         return mix(self.T["g0"], self.T["g1"], yf)
 
-    # ------------------------------------------------------------ layout
     def _layout(self, _=None):
         W, H, M, c = self.c.winfo_width(), self.c.winfo_height(), self.M, self.c
         if W < 200 or H < 200:
@@ -376,7 +366,6 @@ class PCMaster:
             c.coords(b, 0, i * H / n, W, (i + 1) * H / n + 1)
         self._pintar_fondo()
 
-        # cabecera
         self.v_cab.colocar(M, M, W - M, M + 56)
         cy = M + 28
         c.coords(self.logo, M + 20, cy - 6, M + 32, cy + 6)
@@ -390,7 +379,6 @@ class PCMaster:
         c.coords(self.dot, x - 150, cy - 4, x - 142, cy + 4)
         c.coords(self.lbl_estado, x - 134, cy)
 
-        # barra lateral
         top = M + 72
         sx, sw = M, self.SIDEBAR
         self.v_side.colocar(sx, top, sx + sw, H - M)
@@ -431,7 +419,6 @@ class PCMaster:
         c.coords(self.s_error, x0, y + 6)
         c.coords(self.s_nota, x0, H - M - 14)
 
-        # zona principal
         mx1, mx2 = sx + sw + M, W - M
         chip_w = (mx2 - mx1 - 8 * (len(self.chips) - 1)) / len(self.chips)
         for i, b in enumerate(self.chips):
@@ -481,7 +468,6 @@ class PCMaster:
         self.c.coords(self.thumb, rr(x, y1, x + 4, y2, 2))
         self.c.itemconfigure(self.thumb, state="normal")
 
-    # -------------------------------------------------------------- tema
     def _aplicar_tema(self):
         T, t = self.T, self.chat
         sel = hx(mix(rgb(T["chat_bg"]), T["accent"], 0.45))
@@ -504,7 +490,7 @@ class PCMaster:
         t.tag_config("nota", background=T["nota_bg"], foreground=T["nota_fg"], lmargin1=18, lmargin2=18,
                      rmargin=20, spacing1=1, spacing3=1)
         for tag, fondo in (("bot", T["bot_bg"]), ("build", T["build_bg"]), ("nota", T["nota_bg"])):
-            try:  # colorea el margen izquierdo para que la tarjeta no tenga huecos (Tk 8.6.6+)
+            try: 
                 t.tag_config(tag, lmargincolor=fondo)
             except tk.TclError:
                 pass
@@ -544,7 +530,6 @@ class PCMaster:
         self.explicar = not self.explicar
         self.b_explicar.set_sel(self.explicar)
 
-    # ------------------------------------------------------ animación
     def _frame(self):
         ahora = time.perf_counter()
         dt = min(ahora - self.ultimo, 0.1)
@@ -631,7 +616,6 @@ class PCMaster:
         for b in self.botones:
             b.pintar()
 
-    # ------------------------------------------------- render de mensajes
     @staticmethod
     def _pref(base):
         return "  " if base == "usuario" else ""
@@ -695,7 +679,6 @@ class PCMaster:
     def _nota(self, texto):
         self._editar(lambda: (self.chat.insert("end", "\n"), self._render(texto, "nota")))
 
-    # ------------------------------------------------------ estado / cola
     def _estado(self, modo, etiqueta):
         self.modo, self.etiqueta = modo, etiqueta
         self.sucio = True
@@ -732,8 +715,7 @@ class PCMaster:
                         self._estado("ok", f"listo  ·  {self.modelo}") if ok else self._estado("error", info)
         except queue.Empty:
             pass
-
-    # ------------------------------------------------------ modelo / LLM
+           
     def _precargar(self):
         """Carga el modelo en memoria al abrir el programa: la primera respuesta ya no tarda."""
         modelos = []
@@ -829,9 +811,8 @@ class PCMaster:
         self._set_busy(False)
         self._estado("error", "Ollama sin conexión")
 
-    # ------------------------------------------------------------ chat
     def _enter(self, e):
-        if e.state & 0x1:  # Shift: salto de línea normal
+        if e.state & 0x1:
             return None
         self.enviar_o_detener()
         return "break"
@@ -854,7 +835,6 @@ class PCMaster:
         mensajes.append({"role": "user", "content": pregunta})
         self._lanzar(self._historial())
 
-    # ------------------------------------------------- armador rápido
     def _tipo_cambio(self):
         try:
             tc = float(self.e_tc.get().replace(",", "."))
@@ -913,7 +893,6 @@ class PCMaster:
         self._estado(self.modo, "build copiado al portapapeles")
         self.root.after(1800, lambda: self._estado(self.modo, f"listo  ·  {self.modelo}") if not self.ocupado and self.modo == "ok" else None)
 
-    # ------------------------------------------- resumen / exportar / limpiar
     def resumen(self):
         """3) Breve resumen del historial para el usuario."""
         preguntas = [m["content"] for m in mensajes if m["role"] == "user"]
