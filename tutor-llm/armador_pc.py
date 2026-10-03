@@ -1,9 +1,3 @@
-"""Armador rápido de PCs: catálogo de componentes + optimizador de builds (sin LLM, instantáneo).
-
-Los precios son REFERENCIAS APROXIMADAS en USD (calle, EE. UU., octubre 2026) y cambian
-mucho: la escasez de memoria de 2026 encareció bastante la RAM DDR5 y los SSD.
-Actualiza el catálogo cuando quieras; el resto del programa se ajusta solo.
-"""
 import itertools
 import math
 import re
@@ -11,8 +5,6 @@ import unicodedata
 
 ACTUALIZADO = "octubre 2026"
 
-# ----------------------------------------------------------------------------- CPUs
-# juego / multi: puntajes relativos (100 = referencia alta). pico: consumo máximo aprox (W).
 CPUS = [
     dict(nombre="AMD Ryzen 5 5600", marca="AMD", socket="AM4", mem="DDR4", nucleos="6C/12H",
          precio=110, pico=88, juego=55, multi=40, cooler_incluido=True, igpu=False),
@@ -40,8 +32,6 @@ CPUS = [
          precio=650, pico=230, juego=97, multi=103, cooler_incluido=False, igpu=True),
 ]
 
-# ----------------------------------------------------------------------------- GPUs
-# rend: rendimiento relativo (RTX 5080 = 100). largo: True si suele medir más de 320 mm.
 GPUS = [
     dict(nombre="Gráficos integrados del CPU", marca="Integrada", vram=0, precio=0, tgp=0, rend=8,
          largo=False, conector="-"),
@@ -67,7 +57,7 @@ GPUS = [
          largo=True, conector="12V-2x6"),
 ]
 
-RAM = {  # (GB, tipo): (descripción, precio)
+RAM = {  
     (16, "DDR4"): ("16 GB (2x8) DDR4-3200", 89),
     (32, "DDR4"): ("32 GB (2x16) DDR4-3200", 198),
     (16, "DDR5"): ("16 GB (2x8) DDR5-6000", 215),
@@ -75,7 +65,7 @@ RAM = {  # (GB, tipo): (descripción, precio)
     (64, "DDR5"): ("64 GB (2x32) DDR5-6000", 790),
 }
 
-PLACAS = {  # socket: [(nivel, nombre, precio)]  nivel 0 = básica, 1 = media, 2 = alta
+PLACAS = {  
     "AM4": [(0, "B550 (DDR4)", 100), (1, "B550 (DDR4)", 100), (2, "B550 (DDR4) gama alta", 140)],
     "LGA1700": [(0, "B760 DDR4", 110), (1, "B760 DDR4", 110), (2, "B760 DDR4", 110)],
     "AM5": [(0, "A620", 100), (1, "B650", 150), (2, "B850", 190)],
@@ -108,7 +98,6 @@ USOS = {
 }
 
 
-# ----------------------------------------------------------------------- reglas
 def _cooler(cpu):
     if cpu["cooler_incluido"] and cpu["pico"] <= 150:
         return "Disipador incluido con el procesador", 0
@@ -128,11 +117,11 @@ def _placa(cpu, nivel):
 
 
 def consumo(cpu, gpu):
-    return cpu["pico"] + gpu["tgp"] + 75  # +75 W para placa, RAM, SSD y ventiladores
+    return cpu["pico"] + gpu["tgp"] + 75 
 
 
 def fuente(watts_estimados):
-    necesarios = watts_estimados * 1.3  # margen del 30%
+    necesarios = watts_estimados * 1.3 
     for w, nombre, precio in FUENTES:
         if w >= necesarios:
             return w, nombre, precio
@@ -194,7 +183,7 @@ def armar(presupuesto_usd, uso="gaming_1080", plataforma="cualquiera", marca_gpu
         gpus = [g for g in gpus if g["vram"] >= 12]
     else:
         gpus = [g for g in gpus if g["vram"] > 0]
-    if not gpus:  # p. ej. IA local con filtro de marca sin opciones
+    if not gpus:  
         gpus = [g for g in GPUS if g["vram"] >= 12]
 
     candidatos = []
@@ -221,7 +210,6 @@ def armar(presupuesto_usd, uso="gaming_1080", plataforma="cualquiera", marca_gpu
     else:
         b = max(dentro, key=lambda c: (round(c[1], 1), -c[0]["total"]))[0]
 
-    # mejoras con lo que sobra
     sobra = presupuesto_usd - b["total"]
     if dentro and uso != "oficina":
         if b["ssd_tb"] == 1 and sobra >= ALMACENAMIENTO[1][2] - ALMACENAMIENTO[0][2] + 40:
@@ -279,7 +267,6 @@ def _notas(b):
     return n
 
 
-# ------------------------------------------------------------- texto y lenguaje
 def formato(b, moneda="MXN", tipo_cambio=18.5):
     f = (lambda usd: f"${usd * tipo_cambio:,.0f} MXN") if moneda == "MXN" else (lambda usd: f"${usd:,.0f} USD")
     lineas = [f"BUILD SUGERIDO · {USOS[b['uso']]} · presupuesto {f(b['presupuesto'])}", ""]
@@ -304,8 +291,8 @@ _NUM = re.compile(r"(\$)?\s*(\d[\d,\.]*)\s*(k|mil)?\b(\s*(?:pesos|mxn|usd|dolare
 
 
 def _monto(t):
-    t = re.sub(r"\b[2-8]k\b", " ", t)  # resoluciones (4k, 2k)
-    t = _NO_DINERO.sub(" ", t)          # modelos de componentes (rtx 5070, ryzen 7 ...)
+    t = re.sub(r"\b[2-8]k\b", " ", t) 
+    t = _NO_DINERO.sub(" ", t)         
     mejores = []
     for m in _NUM.finditer(t):
         crudo = m.group(2).strip(".,")
@@ -323,7 +310,7 @@ def _monto(t):
             mejores.append((pistas, valor))
     if not mejores:
         return None
-    return max(mejores)[1]  # prefiere el que tiene pistas de dinero ($, mil, k, pesos)
+    return max(mejores)[1] 
 
 
 def interpretar(texto, moneda_def="MXN"):
