@@ -1,0 +1,10 @@
+# Entorno virtual y caché de Python
+.venv/
+__pycache__/
+*.pyc
+
+# Credenciales: NUNCA subir
+.env
+
+# Ajustes locales de la app
+logiuncodigo/ajustes.json

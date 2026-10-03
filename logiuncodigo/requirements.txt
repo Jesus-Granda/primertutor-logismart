@@ -1,0 +1,9 @@
+ollama>=0.4
+pymongo[srv]>=4.6
+pydantic>=2.5
+python-dotenv>=1.0
+pandas>=2.0
+plotly>=5.18
+streamlit>=1.50
+reportlab>=4.0
+mongomock>=4.1   # pruebas unitarias y modo memoria
