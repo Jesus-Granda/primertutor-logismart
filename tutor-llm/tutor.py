@@ -1,17 +1,3 @@
-"""PRÁCTICA 2 - PC MASTER: tutor de armado de PCs con LLM (Ollama) + interfaz gráfica Tkinter.
-
-Cumple la práctica:
-  1. Configuración del sistema distinta al ejemplo (tutor de armado de PCs y componentes).
-  2. Interfaz gráfica intuitiva (estilo glass sobrio, tema claro/oscuro).
-  3. Resumen del historial para el usuario.
-
-Extras: armador rápido de builds (instantáneo, funciona aun sin Ollama), detección de
-"ármame una PC de X" en el chat, catálogo de componentes actuales, precarga del modelo,
-respuestas en streaming con botón Detener, selector de modelo, copiar build y exportar chat.
-
-Ejecutar:   python tutor.py            (armador_pc.py debe estar en la misma carpeta)
-Requisitos: pip install ollama   |   ollama pull llama3.2
-"""
 import math
 import queue
 import re
